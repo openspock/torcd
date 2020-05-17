@@ -8,13 +8,17 @@
 namespace torc {
     namespace cfg {
 
-        struct Config
+        struct Proc
         {
             std::string     cf_name; // name entry
             std::uint32_t   cf_t_cnt; // count of parallel executions
             std::string     cf_cmd; // command to be executed
         }
-    }
+
+        struct Base
+        {
+            std::vector<Proc> procs;
+        }
 }
 
 #endif
