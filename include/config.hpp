@@ -12,14 +12,15 @@ namespace torc {
 
         struct Proc
         {
-            std::string     cf_name; // name entry
-            std::uint32_t   cf_t_cnt; // count of parallel executions
-            std::string     cf_cmd; // command to be executed
+            std::string     p_name; // name entry
+            std::uint32_t   p_t_cnt; // count of parallel executions
+            std::string     p_cmd; // command to be executed
         };
 
         struct Base
         {
-            std::vector<Proc> procs;
+            std::uint32_t       b_port;
+            std::vector<Proc>   b_procs;
         };
 
         // factory function to create a base config

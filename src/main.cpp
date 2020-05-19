@@ -11,10 +11,11 @@ int main(int argc, char **argv)
   try
   {
       auto config = torc::cfg::create().value();
-      std::cout << config.procs[0].cf_name << std::endl;
+      std::cout << config.b_procs[0].p_name << std::endl;
   }
   catch (const std::bad_optional_access& boaex)
   {
+      std::cout << "Check your torc.cfg file" << std::endl;
       return(EXIT_FAILURE);
   }
 

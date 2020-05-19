@@ -40,6 +40,10 @@ namespace torc {
             {
                 std::vector<torc::cfg::Proc> procs;
 
+                // lookup port
+                const std::uint32_t port = cfg.lookup("port");
+
+                // lookup processes
                 const libconfig::Setting &processes = cfg.getRoot()["processes"];
 
                 const int p_count = processes.getLength();
@@ -65,7 +69,7 @@ namespace torc {
                     procs.push_back(torc::cfg::Proc { name, cnt, cmd });
                 }
 
-                return torc::cfg::Base{ procs };
+                return torc::cfg::Base{ port, procs };
             }
             catch (const libconfig::SettingNotFoundException &snfex)
             {
