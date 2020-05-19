@@ -11,7 +11,7 @@ curl -sl https://raw.githubusercontent.com/hyperrealm/libconfig/master/lib/libco
 mkdir -p target
 
 # download and build libconfig
-curl -sl https://hyperrealm.github.io/libconfig/dist/libconfig-1.7.2.tar.gz -o ./target/$LIB_CONFIG.tar.gz
+curl -sl https://hyperrealm.github.io/libconfig/dist/$LIB_CONFIG.tar.gz -o ./target/$LIB_CONFIG.tar.gz
 
 cd target
 tar -xzf $LIB_CONFIG.tar.gz
