@@ -26,7 +26,8 @@ $(MAIN):
 	$(CC) $(CFLAGS) -c -o $(MAIN) src/main.cpp 
 
 $(CONFIG):
-	$(CC) $(CFLAGS) -c -o $(CONFIG) src/config.cpp include/config.hpp
+	$(CC) $(CFLAGS) -c src/config.cpp -Iinclude/config.hpp -o $(CONFIG)
 
 clean:
 	rm target/*.o target/torcd
+	rm include/*.gch
