@@ -13,20 +13,24 @@ TARGET = example
 
 MAIN = target/main.o
 CONFIG = target/config.o
+SERVER = target/server.o
 
 all: $(TARGET)
   
 $(TARGET): src/main.cpp
 	$(CC) $(CFLAGS) -o target/$(TARGET) src/main.cpp /usr/local/lib/libconfig++.a 
 
-torcd: $(MAIN) $(CONFIG)
-	$(CC) $(MAIN) $(CONFIG) -o target/torcd /usr/local/lib/libconfig++.a
+torcd: $(MAIN) $(CONFIG) $(SERVER)
+	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd /usr/local/lib/libconfig++.a
 
 $(MAIN):
 	$(CC) $(CFLAGS) -c -o $(MAIN) src/main.cpp 
 
 $(CONFIG):
 	$(CC) $(CFLAGS) -c src/config.cpp -Iinclude/config.hpp -o $(CONFIG)
+
+$(SERVER):
+	$(CC) $(CFLAGS) -c src/server.cpp -Iinclude/server.hpp -o $(SERVER)
 
 clean:
 	rm target/*.o target/torcd
