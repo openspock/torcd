@@ -5,6 +5,7 @@
 
 #include "../include/libconfig.hpp"
 #include "../include/config.hpp"
+#include "../include/server.hpp"
 
 int main(int argc, char **argv)
 {
@@ -12,6 +13,8 @@ int main(int argc, char **argv)
   {
       auto config = torc::cfg::create().value();
       std::cout << config.b_procs[0].p_name << std::endl;
+
+      auto ec = torc::svc::start(config);     
   }
   catch (const std::bad_optional_access& boaex)
   {

@@ -38,6 +38,8 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
     //Listen
     listen(socket_desc , 3);
 
+    std::cout << "starting to accept incoming connections" << std::endl;
+
     c = sizeof(struct sockaddr_in);
     while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
     {
@@ -48,6 +50,8 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
         }
 
         std::cout << "Received ping from client with id: " << new_socket << std::endl;
+
+        write(new_socket, "Hello!\n", 8);
 
     }
 
