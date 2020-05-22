@@ -4,6 +4,7 @@
 #include <netdb.h>	//hostent
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <thread>
 
 #include "../include/config.hpp"
 #include "../include/server.hpp"
@@ -51,9 +52,16 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
 
         std::cout << "Received ping from client with id: " << new_socket << std::endl;
 
-        write(new_socket, "Hello!\n", 8);
+        std::thread t(connection_handler, new_socket);
 
+        t.join();
     }
 
     return exitcode::graceful_shutdown;
 }
+
+void torc::svc::connection_handler(const std::uint64_t sock_desc)
+{
+    write(sock_desc, "Hello!\n", 8);
+    close(sock_desc);
+}   

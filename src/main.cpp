@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
@@ -14,7 +15,9 @@ int main(int argc, char **argv)
       auto config = torc::cfg::create().value();
       std::cout << config.b_procs[0].p_name << std::endl;
 
-      auto ec = torc::svc::start(config);     
+      auto ec = torc::svc::start(config);
+
+      return static_cast<std::int16_t>(ec);     
   }
   catch (const std::bad_optional_access& boaex)
   {

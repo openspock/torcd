@@ -18,10 +18,10 @@ SERVER = target/server.o
 all: $(TARGET)
   
 $(TARGET): src/main.cpp
-	$(CC) $(CFLAGS) -o target/$(TARGET) src/main.cpp /usr/local/lib/libconfig++.a 
+	$(CC) $(CFLAGS) -o target/$(TARGET) src/main.cpp /usr/local/lib/libconfig++.a
 
 torcd: $(MAIN) $(CONFIG) $(SERVER)
-	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd /usr/local/lib/libconfig++.a
+	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd /usr/local/lib/libconfig++.a -pthread
 
 $(MAIN):
 	$(CC) $(CFLAGS) -c -o $(MAIN) src/main.cpp 
@@ -34,4 +34,4 @@ $(SERVER):
 
 clean:
 	rm target/*.o target/torcd
-	rm include/*.gch
+	#rm include/*.gch
