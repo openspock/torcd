@@ -4,7 +4,7 @@
 #include <optional>
 #include <filesystem>
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include <cinttypes>
 
 namespace torc {
@@ -20,7 +20,7 @@ namespace torc {
         struct Base
         {
             std::uint32_t       b_port;
-            std::vector<Proc>   b_procs;
+            std::unordered_map<std::string, Proc>   b_procs;
         };
 
         // factory function to create a base config

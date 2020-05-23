@@ -1,3 +1,5 @@
+#include <cstdint>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <sys/socket.h>
@@ -5,14 +7,22 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
+#include <unordered_map>
+#include <atomic>
 
 #include "../include/config.hpp"
 #include "../include/server.hpp"
 
 using torc::svc::exitcode;
-    
+
 exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
+    std::unordered_map<std::string, std::atomic_uint32_t> proc_th_cnt;
+    for (auto& it: cfg.b_procs)
+    {
+        proc_th_cnt.emplace(it.first, it.second.p_t_cnt);
+    }
+
     int socket_desc , new_socket , c;
     struct sockaddr_in server , client;
     
@@ -52,7 +62,7 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
 
         std::cout << "Received ping from client with id: " << new_socket << std::endl;
 
-        std::thread t(connection_handler, new_socket);
+        std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
         t.join();
     }
@@ -60,7 +70,7 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
     return exitcode::graceful_shutdown;
 }
 
-void torc::svc::connection_handler(const std::uint64_t sock_desc)
+void torc::svc::connection_handler(const std::uint64_t sock_desc, const torc::cfg::Base& cfg, const std::unordered_map<std::string, std::atomic_uint32_t>& proc_th_cnt)
 {
     write(sock_desc, "Hello!\n", 8);
     close(sock_desc);

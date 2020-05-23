@@ -13,7 +13,6 @@ int main(int argc, char **argv)
   try
   {
       auto config = torc::cfg::create().value();
-      std::cout << config.b_procs[0].p_name << std::endl;
 
       auto ec = torc::svc::start(config);
 
