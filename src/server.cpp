@@ -13,9 +13,7 @@
 #include "../include/config.hpp"
 #include "../include/server.hpp"
 
-using torc::svc::exitcode;
-
-exitcode torc::svc::start(const torc::cfg::Base cfg)
+torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
     std::unordered_map<std::string, std::atomic_uint32_t> proc_th_cnt;
     for (auto& it: cfg.b_procs)
@@ -67,10 +65,15 @@ exitcode torc::svc::start(const torc::cfg::Base cfg)
         t.join();
     }
 
-    return exitcode::graceful_shutdown;
+    return torc::svc::exitcode::graceful_shutdown;
 }
 
-void torc::svc::connection_handler(const std::uint64_t sock_desc, const torc::cfg::Base& cfg, const std::unordered_map<std::string, std::atomic_uint32_t>& proc_th_cnt)
+void torc::svc::connection_handler
+(
+    const std::uint64_t sock_desc, 
+    const torc::cfg::Base& cfg, 
+    const std::unordered_map<std::string, std::atomic_uint32_t>& proc_th_cnt
+)
 {
     write(sock_desc, "Hello!\n", 8);
     close(sock_desc);

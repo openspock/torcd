@@ -1,7 +1,5 @@
 #include <cstdint>
 #include <iostream>
-#include <iomanip>
-#include <cstdlib>
 #include <optional>
 
 #include "../include/libconfig.hpp"
