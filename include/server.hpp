@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <atomic>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -10,6 +11,9 @@
 
 namespace torc {
     namespace svc {
+
+        typedef std::shared_ptr<std::atomic_uint32_t> atomic_ptr_t;
+        typedef std::unordered_map<std::string, atomic_ptr_t> atomic_umap_t;
 
         enum class exitcode: std::int16_t
         {
@@ -28,7 +32,7 @@ namespace torc {
         // socket descriptor
         // reference to base cfg
         // reference to a map of proc and thread count
-        void connection_handler(std::uint64_t, const torc::cfg::Base&, const std::unordered_map<std::string, std::atomic_uint32_t>&);
+        void connection_handler(std::uint64_t, const torc::cfg::Base&, const atomic_umap_t&);
     }
 }
 

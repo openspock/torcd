@@ -1,7 +1,12 @@
+#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
 #include <string>
+#include <string.h> //memchr
 #include <sys/socket.h>
 #include <netdb.h>	//hostent
 #include <arpa/inet.h>
@@ -13,12 +18,14 @@
 #include "../include/config.hpp"
 #include "../include/server.hpp"
 
+const std::size_t BUF_SIZE = 1024;
+
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
-    std::unordered_map<std::string, std::atomic_uint32_t> proc_th_cnt;
+    torc::svc::atomic_umap_t proc_th_cnt;
     for (auto& it: cfg.b_procs)
     {
-        proc_th_cnt.emplace(it.first, it.second.p_t_cnt);
+        proc_th_cnt[it.first] = torc::svc::atomic_ptr_t(new std::atomic_uint32_t(it.second.p_t_cnt));
     }
 
     int socket_desc , new_socket , c;
@@ -72,9 +79,40 @@ void torc::svc::connection_handler
 (
     const std::uint64_t sock_desc, 
     const torc::cfg::Base& cfg, 
-    const std::unordered_map<std::string, std::atomic_uint32_t>& proc_th_cnt
+    const torc::svc::atomic_umap_t& proc_th_cnt
 )
 {
-    write(sock_desc, "Hello!\n", 8);
+    std::size_t bytes_read = 0;
+    char buff[BUF_SIZE];
+    std::atomic_uint32_t* count;
+
+    while ((bytes_read = recv(sock_desc, buff, BUF_SIZE, 0)) > 0)
+    {
+        std::string input;
+        char* z_byt = static_cast<char*>(memchr(buff, '\0', bytes_read));
+        z_byt = z_byt ? z_byt : static_cast<char*>(memchr(buff, '\r', bytes_read));
+        z_byt = z_byt ? z_byt : static_cast<char*>(memchr(buff, '\n', bytes_read));
+        input.assign(buff, z_byt ? z_byt - buff : bytes_read);
+
+        try 
+        {
+            auto proc = cfg.b_procs.at(input);
+
+            count = proc_th_cnt.at(input).get();
+
+            (*count)--;
+
+            write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
+        } catch (const std::out_of_range& oorex) 
+        {
+            write(sock_desc, "torcd: Not found!", 17);
+        }
+    }
+
+    if (count)
+    {
+        (*count)++;
+    }
+    
     close(sock_desc);
 }   
