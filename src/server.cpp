@@ -75,18 +75,14 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
     return torc::svc::exitcode::graceful_shutdown;
 }
 
-void torc::svc::connection_handler
-(
-    const std::uint64_t sock_desc, 
-    const torc::cfg::Base& cfg, 
-    const torc::svc::atomic_umap_t& proc_th_cnt
-)
+std::string read_ip(const std::uint64_t sd)
 {
     std::size_t bytes_read = 0;
-    char buff[BUF_SIZE];
-    std::atomic_uint32_t* count;
+    char buff[BUF_SIZE];    
 
-    while ((bytes_read = recv(sock_desc, buff, BUF_SIZE, 0)) > 0)
+    std::string result;
+
+    while ((bytes_read = recv(sd, buff, BUF_SIZE, 0)) > 0)
     {
         std::string input;
         char* z_byt = static_cast<char*>(memchr(buff, '\0', bytes_read));
@@ -94,20 +90,39 @@ void torc::svc::connection_handler
         z_byt = z_byt ? z_byt : static_cast<char*>(memchr(buff, '\n', bytes_read));
         input.assign(buff, z_byt ? z_byt - buff : bytes_read);
 
-        try 
-        {
-            auto proc = cfg.b_procs.at(input);
+        result += input;
 
-            count = proc_th_cnt.at(input).get();
+        if (bytes_read < BUF_SIZE) break;
+    } 
+    
+    return result;
+}
 
-            (*count)--;
+void torc::svc::connection_handler
+(
+    const std::uint64_t sock_desc, 
+    const torc::cfg::Base& cfg, 
+    const torc::svc::atomic_umap_t& proc_th_cnt
+)
+{
+    std::atomic_uint32_t* count;
 
-            write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
-        } catch (const std::out_of_range& oorex) 
-        {
-            write(sock_desc, "torcd: Not found!", 17);
-        }
+    auto input = read_ip(sock_desc);
+
+    try 
+    {
+        auto proc = cfg.b_procs.at(input);
+
+        count = proc_th_cnt.at(input).get();
+
+        (*count)--;
+
+        write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
+    } catch (const std::out_of_range& oorex) 
+    {
+        write(sock_desc, "torcd: Not found!", 17);
     }
+    
 
     if (count)
     {
@@ -115,4 +130,4 @@ void torc::svc::connection_handler
     }
     
     close(sock_desc);
-}   
+}
