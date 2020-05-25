@@ -18,6 +18,7 @@
 #include <thread>
 #include <unordered_map>
 #include <atomic>
+#include <vector>
 
 #include "../include/config.hpp"
 #include "../include/server.hpp"
@@ -141,7 +142,6 @@ void torc::svc::connection_handler
 
         if (input == "invoke")
         {
-            write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
             exec(proc, sock_desc);
         }
     } catch (const std::out_of_range& oorex) 
@@ -182,7 +182,7 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
         return -1;
     }
 
-    child = vfork();
+    child = fork();
     if (child == 0) // child
     {
         if (dup2(stdin_pipes[PIPE_READ_FD], STDIN_FILENO) == -1) // redirect stdin
@@ -211,9 +211,11 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
         close(stdout_pipes[PIPE_READ_FD]);
         close(stdout_pipes[PIPE_WRIT_FD]);
 
-        char** argv = {};
+        std::unique_ptr<char*[]> argv{new char*[2]};
+        strcpy(argv[0], proc.p_name.c_str());
+        argv[1] = NULL;
 
-        result = execve(proc.p_cmd.c_str(), argv, environ);
+        result = execve(proc.p_cmd.c_str(), argv.get() , environ);
 
         exit(result);
     }
@@ -227,6 +229,7 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
 
         while ( (bytes_read = read(stdout_pipes[PIPE_READ_FD], buf, BUF_SIZE)) > 0)
         {
+            std::cout << buf << std::endl;
             // write back to the client sock
             write(sd, buf, bytes_read);
         }
