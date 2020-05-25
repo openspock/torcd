@@ -1,6 +1,10 @@
 #include <algorithm>
 #include <array>
+#include <bits/c++config.h>
+#include <cerrno>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -18,7 +22,11 @@
 #include "../include/config.hpp"
 #include "../include/server.hpp"
 
+extern char **environ;
+
 const std::size_t BUF_SIZE = 1024;
+const std::int32_t PIPE_READ_FD = 0;
+const std::int32_t PIPE_WRIT_FD = 1;
 
 // Reads data from the socket descriptor
 std::string read_from_sd(const std::uint64_t);
@@ -26,7 +34,11 @@ std::string read_from_sd(const std::uint64_t);
 // Executes the process and 
 // reads/ writes from the passed socket descriptor 
 // to the process std file descriptor.
-void exec(const torc::cfg::Proc&, std::uint64_t);
+std::int64_t exec(const torc::cfg::Proc&, std::uint64_t);
+
+// write string to a socket descriptor
+void write_to_sd(const std::string, std::uint64_t);
+
 
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
@@ -146,7 +158,92 @@ void torc::svc::connection_handler
     close(sock_desc);
 }
 
-void exec(const torc::cfg::Proc& proc, std::uint64_t sd)
+std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
 {
-    
+    std::array<std::int32_t, 2> stdin_pipes;
+    std::array<std::int32_t, 2> stdout_pipes;
+
+    std::int64_t result, child;
+
+    if (pipe(stdin_pipes.data()) < 0)
+    {
+        write_to_sd("torcd: error allocating read pipe for child proc", sd);
+        
+        return -1;
+    }
+
+    if (pipe(stdout_pipes.data()) < 0)
+    {
+        close(stdin_pipes[PIPE_READ_FD]);
+        close(stdin_pipes[PIPE_WRIT_FD]);
+
+        write_to_sd("torcd: error allocating write pipe for child proc", sd);
+        
+        return -1;
+    }
+
+    child = vfork();
+    if (child == 0) // child
+    {
+        if (dup2(stdin_pipes[PIPE_READ_FD], STDIN_FILENO) == -1) // redirect stdin
+        {
+            write_to_sd("torcd: error redirecting stdin for child proc", sd);
+
+            exit(errno);
+        }
+
+        if (dup2(stdout_pipes[PIPE_WRIT_FD], STDOUT_FILENO) == -1) // redirect stdout
+        {
+            write_to_sd("torcd: error redirecting stdout for child proc", sd);
+
+            exit(errno);
+        }        
+
+        if (dup2(stdout_pipes[PIPE_WRIT_FD], STDERR_FILENO) == -1) //redirect stderr
+        {
+            write_to_sd("torcd: error redirecting stderr for child proc", sd);
+
+            exit(errno);
+        }        
+
+        close(stdin_pipes[PIPE_READ_FD]);
+        close(stdin_pipes[PIPE_WRIT_FD]);
+        close(stdout_pipes[PIPE_READ_FD]);
+        close(stdout_pipes[PIPE_WRIT_FD]);
+
+        char** argv = {};
+
+        result = execve(proc.p_cmd.c_str(), argv, environ);
+
+        exit(result);
+    }
+    else if (child > 0)
+    {
+        close(stdin_pipes[PIPE_READ_FD]);
+        close(stdout_pipes[PIPE_WRIT_FD]);
+
+        char buf[BUF_SIZE];
+        std::size_t bytes_read;
+
+        while ( (bytes_read = read(stdout_pipes[PIPE_READ_FD], buf, BUF_SIZE)) > 0)
+        {
+            // write back to the client sock
+            write(sd, buf, bytes_read);
+        }
+        
+        close(stdin_pipes[PIPE_WRIT_FD]);
+        close(stdout_pipes[PIPE_READ_FD]);        
+    }
+    else
+    {
+        close(stdin_pipes[PIPE_READ_FD]);
+        close(stdin_pipes[PIPE_WRIT_FD]);
+        close(stdout_pipes[PIPE_READ_FD]);
+        close(stdout_pipes[PIPE_WRIT_FD]);        
+    }
+}
+
+void write_to_sd(const std::string msg, std::uint64_t sd)
+{
+    write(sd, msg.c_str(), msg.length());
 }
