@@ -241,6 +241,8 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
         close(stdout_pipes[PIPE_READ_FD]);
         close(stdout_pipes[PIPE_WRIT_FD]);        
     }
+
+    return child;
 }
 
 void write_to_sd(const std::string msg, std::uint64_t sd)
