@@ -20,6 +20,14 @@
 
 const std::size_t BUF_SIZE = 1024;
 
+// Reads data from the socket descriptor
+std::string read_from_sd(const std::uint64_t);
+
+// Executes the process and 
+// reads/ writes from the passed socket descriptor 
+// to the process std file descriptor.
+void exec(const torc::cfg::Proc&, std::uint64_t);
+
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
     torc::svc::atomic_umap_t proc_th_cnt;
@@ -75,7 +83,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
     return torc::svc::exitcode::graceful_shutdown;
 }
 
-std::string read_ip(const std::uint64_t sd)
+std::string read_from_sd(const std::uint64_t sd)
 {
     std::size_t bytes_read = 0;
     char buff[BUF_SIZE];    
@@ -107,7 +115,7 @@ void torc::svc::connection_handler
 {
     std::atomic_uint32_t* count;
 
-    auto input = read_ip(sock_desc);
+    auto input = read_from_sd(sock_desc);
 
     try 
     {
@@ -117,7 +125,13 @@ void torc::svc::connection_handler
 
         (*count)--;
 
-        write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
+        input = read_from_sd(sock_desc);
+
+        if (input == "invoke")
+        {
+            write(sock_desc, proc.p_cmd.c_str(), proc.p_cmd.length());
+            exec(proc, sock_desc);
+        }
     } catch (const std::out_of_range& oorex) 
     {
         write(sock_desc, "torcd: Not found!", 17);
@@ -130,4 +144,9 @@ void torc::svc::connection_handler
     }
     
     close(sock_desc);
+}
+
+void exec(const torc::cfg::Proc& proc, std::uint64_t sd)
+{
+    
 }
