@@ -9,9 +9,10 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <string.h> //memchr
+#include <cstring> //memchr
 #include <sys/socket.h>
 #include <netdb.h>	//hostent
 #include <arpa/inet.h>
@@ -26,7 +27,7 @@
 
 extern char **environ;
 
-const std::size_t BUF_SIZE = 1024;
+const std::int32_t BUF_SIZE = 1024;
 const std::int32_t PIPE_READ_FD = 0;
 const std::int32_t PIPE_WRIT_FD = 1;
 
@@ -96,7 +97,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 
 std::string read_from_sd(const std::int32_t sd)
 {
-    std::size_t bytes_read = 0;
+    std::int32_t bytes_read = 0;
     char buff[BUF_SIZE];    
 
     std::string result;
@@ -122,15 +123,13 @@ std::string read_from_sd(const std::int32_t sd)
 
 void torc::svc::connection_handler (const std::int32_t sock_desc, const torc::cfg::Base& cfg, const torc::svc::atomic_umap_t& proc_th_cnt)
 {
-    std::atomic_uint32_t* count;
-
     auto input = read_from_sd(sock_desc);
 
     try 
     {
         auto proc = cfg.b_procs.at(input);
 
-        count = proc_th_cnt.at(input).get();
+        std::atomic_uint32_t* count = proc_th_cnt.at(input).get();
 
         (*count)--;
 
@@ -140,15 +139,14 @@ void torc::svc::connection_handler (const std::int32_t sock_desc, const torc::cf
         {
             exec(proc, sock_desc);
         }
-    } catch (const std::out_of_range& oorex) 
-    {
-        write_to_sd("torcd: Not found!", sock_desc);
-    }
-    
 
-    if (count)
-    {
         (*count)++;
+    } 
+    catch (const std::out_of_range& oorex) 
+    {
+        std::stringstream msg;
+        msg << "torcd: " << input << ":Not found!" << std::endl; 
+        write_to_sd(msg.str().c_str(), sock_desc);
     }
     
     close(sock_desc);
@@ -221,9 +219,9 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::int32_t sd)
         close(stdout_pipes[PIPE_WRIT_FD]);
 
         char buf[BUF_SIZE];
-        std::size_t bytes_read;
+        std::int32_t bytes_read;
 
-        while ( (bytes_read = read(stdout_pipes[PIPE_READ_FD], buf, BUF_SIZE)) > 0)
+        while ((bytes_read = read(stdout_pipes[PIPE_READ_FD], buf, BUF_SIZE)) > 0)
         {
             // write back to the client sock
             write(sd, buf, bytes_read);
