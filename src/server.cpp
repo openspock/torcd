@@ -4,6 +4,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -29,16 +30,17 @@ const std::size_t BUF_SIZE = 1024;
 const std::int32_t PIPE_READ_FD = 0;
 const std::int32_t PIPE_WRIT_FD = 1;
 
-// Reads data from the socket descriptor
-std::string read_from_sd(const std::uint64_t);
-
 // Executes the process and 
 // reads/ writes from the passed socket descriptor 
 // to the process std file descriptor.
-std::int64_t exec(const torc::cfg::Proc&, std::uint64_t);
+std::int64_t exec(const torc::cfg::Proc&, std::int32_t);
+
+// read buffer char data from the socket descriptor
+// and return a string.
+std::string read_from_sd(const std::int32_t);
 
 // write string to a socket descriptor
-void write_to_sd(const std::string, std::uint64_t);
+void write_to_sd(const char*, std::int32_t);
 
 
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
@@ -75,8 +77,6 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
     //Listen
     listen(socket_desc , 3);
 
-    std::cout << "starting to accept incoming connections" << std::endl;
-
     c = sizeof(struct sockaddr_in);
     while( (new_socket = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
     {
@@ -86,8 +86,6 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
             return exitcode::boot_failure;
         }
 
-        std::cout << "Received ping from client with id: " << new_socket << std::endl;
-
         std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
         t.join();
@@ -96,14 +94,14 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
     return torc::svc::exitcode::graceful_shutdown;
 }
 
-std::string read_from_sd(const std::uint64_t sd)
+std::string read_from_sd(const std::int32_t sd)
 {
     std::size_t bytes_read = 0;
     char buff[BUF_SIZE];    
 
     std::string result;
 
-    while ((bytes_read = recv(sd, buff, BUF_SIZE, 0)) > 0)
+    while ((bytes_read = read(sd, buff, BUF_SIZE)) > 0)
     {
         std::string input;
         char* z_byt = static_cast<char*>(memchr(buff, '\0', bytes_read));
@@ -113,18 +111,16 @@ std::string read_from_sd(const std::uint64_t sd)
 
         result += input;
 
-        if (bytes_read < BUF_SIZE) break;
+        if (bytes_read < BUF_SIZE)
+        {
+            break;
+        }
     } 
     
     return result;
 }
 
-void torc::svc::connection_handler
-(
-    const std::uint64_t sock_desc, 
-    const torc::cfg::Base& cfg, 
-    const torc::svc::atomic_umap_t& proc_th_cnt
-)
+void torc::svc::connection_handler (const std::int32_t sock_desc, const torc::cfg::Base& cfg, const torc::svc::atomic_umap_t& proc_th_cnt)
 {
     std::atomic_uint32_t* count;
 
@@ -146,7 +142,7 @@ void torc::svc::connection_handler
         }
     } catch (const std::out_of_range& oorex) 
     {
-        write(sock_desc, "torcd: Not found!", 17);
+        write_to_sd("torcd: Not found!", sock_desc);
     }
     
 
@@ -158,7 +154,7 @@ void torc::svc::connection_handler
     close(sock_desc);
 }
 
-std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
+std::int64_t exec(const torc::cfg::Proc& proc, std::int32_t sd)
 {
     std::array<std::int32_t, 2> stdin_pipes;
     std::array<std::int32_t, 2> stdout_pipes;
@@ -229,7 +225,6 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
 
         while ( (bytes_read = read(stdout_pipes[PIPE_READ_FD], buf, BUF_SIZE)) > 0)
         {
-            std::cout << buf << std::endl;
             // write back to the client sock
             write(sd, buf, bytes_read);
         }
@@ -248,7 +243,7 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::uint64_t sd)
     return child;
 }
 
-void write_to_sd(const std::string msg, std::uint64_t sd)
+void write_to_sd(const char* msg, std::int32_t sd)
 {
-    write(sd, msg.c_str(), msg.length());
+    write(sd, msg, strlen(msg));
 }

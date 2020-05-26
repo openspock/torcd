@@ -32,7 +32,7 @@ namespace torc {
         // socket descriptor
         // reference to base cfg
         // reference to a map of proc and thread count
-        void connection_handler(std::uint64_t, const torc::cfg::Base&, const atomic_umap_t&);
+        void connection_handler(std::int32_t, const torc::cfg::Base&, const atomic_umap_t&);
     }
 }
 
