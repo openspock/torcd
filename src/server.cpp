@@ -1,6 +1,4 @@
-#include <algorithm>
 #include <array>
-#include <bits/c++config.h>
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>
@@ -90,7 +88,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 
         std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
-        t.join();
+        t.detach();
     }
 
     return torc::svc::exitcode::graceful_shutdown;
@@ -132,16 +130,21 @@ void torc::svc::connection_handler (const std::int32_t sock_desc, const torc::cf
 
         std::atomic_uint32_t* count = proc_th_cnt.at(input).get();
 
-        (*count)--;
-
-        input = read_from_sd(sock_desc);
-
-        if (input == "invoke")
+        if (*count == 0)
         {
-            exec(proc, sock_desc);
+            write_to_sd("torcd: busy", sock_desc);
         }
+        else
+        {
+            input = read_from_sd(sock_desc);
 
-        (*count)++;
+            if (input == "invoke")
+            {
+                (*count)--;
+                exec(proc, sock_desc);
+                (*count)++;
+            }            
+        }
     } 
     catch (const std::out_of_range& oorex) 
     {
