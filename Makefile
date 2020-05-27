@@ -9,16 +9,13 @@ CFLAGS  = -g -Wall -std=c++17
   
   
 # the name to use for both the target source file, and the output file:
-TARGET = example
+TARGET = torcd
 
 MAIN = target/main.o
 CONFIG = target/config.o
 SERVER = target/server.o
 
 all: $(TARGET)
-  
-$(TARGET): src/main.cpp
-	$(CC) $(CFLAGS) -o target/$(TARGET) src/main.cpp /usr/local/lib/libconfig++.a
 
 torcd: $(MAIN) $(CONFIG) $(SERVER)
 	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd /usr/local/lib/libconfig++.a -pthread

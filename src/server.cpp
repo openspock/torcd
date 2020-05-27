@@ -14,6 +14,7 @@
 #include <string>
 #include <cstring> //memchr
 #include <sys/socket.h>
+#include <sys/signal.h>
 #include <netdb.h>	//hostent
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -205,11 +206,11 @@ std::int64_t exec(const torc::cfg::Proc& proc, std::int32_t sd)
         close(stdout_pipes[PIPE_READ_FD]);
         close(stdout_pipes[PIPE_WRIT_FD]);
 
-        std::unique_ptr<char*[]> argv{new char*[2]};
-        strcpy(argv[0], proc.p_name.c_str());
-        argv[1] = NULL;
+        char name[proc.p_name.length() + 1];
+        strcpy(name, proc.p_name.c_str());
+        char *argv[] = {name, NULL};
 
-        result = execve(proc.p_cmd.c_str(), argv.get() , environ);
+        result = execve(proc.p_cmd.c_str(), argv , environ);
 
         exit(result);
     }
