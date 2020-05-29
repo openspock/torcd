@@ -9,30 +9,28 @@
 
 #include "./config.hpp"
 
-namespace torc {
-namespace svc {
+namespace torc::svc {
 
-  typedef std::shared_ptr<std::atomic_uint32_t> atomic_ptr_t;
-  typedef std::unordered_map<std::string, atomic_ptr_t> atomic_umap_t;
+using atomic_ptr_t = std::shared_ptr<std::atomic_uint32_t>;
+using atomic_umap_t = std::unordered_map<std::string, atomic_ptr_t>;
 
-  enum class exitcode : std::int16_t {
-    boot_failure = -1,
-    graceful_shutdown
-  };
+enum class exitcode : std::int16_t {
+  boot_failure = -1,
+  graceful_shutdown
+};
 
-  // starts the server with the passed config
-  exitcode start(const torc::cfg::Base cfg);
+// starts the server with the passed config
+exitcode start(torc::cfg::Base cfg);
 
-  // Handles connection for ever new client socket in a new
-  // thread.
-  //
-  // Args
-  //
-  // socket descriptor
-  // reference to base cfg
-  // reference to a map of proc and thread count
-  void connection_handler(std::int32_t, const torc::cfg::Base &, const atomic_umap_t &);
-}// namespace svc
-}// namespace torc
+// Handles connection for ever new client socket in a new
+// thread.
+//
+// Args
+//
+// socket descriptor
+// reference to base cfg
+// reference to a map of proc and thread count
+void connection_handler(std::int32_t, torc::cfg::Base &, atomic_umap_t &);
+}// namespace torc::svc
 
 #endif
