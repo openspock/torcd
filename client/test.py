@@ -28,17 +28,15 @@ def main(argv):
         s.connect((host,int(port)))
         f = s.makefile('w', None)
         f.write(cmd)
-        f.flush()
-        print('sent command name')
+        f.flush()        
         cmd = 'invoke'
         f = s.makefile('w', None)
         f.write(cmd)
-        f.flush()        
-        print('invoking')
+        f.flush()                
         data = s.recv(1024)
         s.close()
 
-    print('Response: ', repr(data))
+    print(data.decode('utf-8'))
 
 if __name__ == "__main__":
    main(sys.argv[1:])
