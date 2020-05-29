@@ -20,7 +20,7 @@ enum class exitcode : std::int16_t {
 };
 
 // starts the server with the passed config
-exitcode start(torc::cfg::Base cfg);
+exitcode start(const torc::cfg::Base cfg);
 
 // Handles connection for ever new client socket in a new
 // thread.
@@ -30,7 +30,7 @@ exitcode start(torc::cfg::Base cfg);
 // socket descriptor
 // reference to base cfg
 // reference to a map of proc and thread count
-void connection_handler(std::int32_t, torc::cfg::Base &, atomic_umap_t &);
+void connection_handler(const std::int32_t, const torc::cfg::Base &, const atomic_umap_t &);
 }// namespace torc::svc
 
 #endif

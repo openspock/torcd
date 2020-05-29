@@ -92,16 +92,16 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 std::string read_from_sd(const std::int32_t sd)
 {
   std::int32_t bytes_read = 0;
-  char buff[BUF_SIZE];
+  std::array<char, BUF_SIZE> buff;
 
   std::string result;
 
-  while ((bytes_read = read(sd, buff, BUF_SIZE)) > 0) {
+  while ((bytes_read = read(sd, buff.data(), BUF_SIZE)) > 0) {
     std::string input;
-    char *z_byt = static_cast<char *>(memchr(buff, '\0', bytes_read));
-    z_byt = z_byt ? z_byt : static_cast<char *>(memchr(buff, '\r', bytes_read));
-    z_byt = z_byt ? z_byt : static_cast<char *>(memchr(buff, '\n', bytes_read));
-    input.assign(buff, z_byt ? z_byt - buff : bytes_read);
+    char *z_byt = static_cast<char *>(memchr(buff.data(), '\0', bytes_read));
+    z_byt = z_byt != nullptr ? z_byt : static_cast<char *>(memchr(buff.data(), '\r', bytes_read));
+    z_byt = z_byt != nullptr ? z_byt : static_cast<char *>(memchr(buff.data(), '\n', bytes_read));
+    input.assign(buff.data(), z_byt != nullptr ? z_byt - buff.data() : bytes_read);
 
     result += input;
 
