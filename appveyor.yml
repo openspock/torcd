@@ -15,6 +15,10 @@ build_script:
 
       sh build.sh
 
+artifacts:
+  - path: target/torcd
+    name: torcd
+
 deploy:
   description: 'torcd major release'
   provider: GitHub
