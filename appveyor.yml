@@ -15,6 +15,10 @@ build_script:
 
       sh build.sh
 
+      ls -ltrh
+
+      ls -ltrh target/*
+
 artifacts:
   - path: target/torcd
     name: torcd
