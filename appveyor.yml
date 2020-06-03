@@ -14,3 +14,12 @@ build_script:
       sh init.sh
 
       sh build.sh
+
+deploy:
+  release: torcd-$(appveyor_build_version)
+  description: 'torcd major release'
+  provider: GitHub
+  auth_token:
+    secure: 2nykYv14S76Qi9U7J2R3uw7hYqeu6Z/NBNZxO6VdWkpRMujggeQihVMWLc5wH25G
+  on:
+    branch: master
