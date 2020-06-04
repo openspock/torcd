@@ -1,4 +1,4 @@
-#example: clang++ src/main.cpp /usr/local/lib/libconfig++.a -o example
+LIB_CONFIG = libconfig-1.7.2
 
 CC = clang++
 
@@ -18,7 +18,7 @@ SERVER = target/server.o
 all: $(TARGET)
 
 torcd: $(MAIN) $(CONFIG) $(SERVER)
-	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd /usr/local/lib/libconfig++.a -pthread
+	$(CC) $(MAIN) $(CONFIG) $(SERVER) -o target/torcd target/$(LIB_CONFIG)/lib/libconfig++.a -pthread
 
 $(MAIN):
 	$(CC) $(CFLAGS) -c -o $(MAIN) src/main.cpp 

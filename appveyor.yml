@@ -15,11 +15,8 @@ build_script:
 
       sh build.sh
 
-      ls -ltrh
 
-      ls -ltrh target/*
-
-    artifacts: /**/*/
+    artifacts: target/torcd
 
 deploy:
   description: 'torcd major release'

@@ -18,6 +18,8 @@ tar -xzf $LIB_CONFIG.tar.gz
 
 cd $LIB_CONFIG
 
-./configure
+./configure --prefix=../.
+
+make
 
 make install
