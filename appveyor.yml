@@ -16,7 +16,9 @@ build_script:
       sh build.sh
 
 
-artifacts: target/torcd
+artifacts: 
+  - path: target/torcd
+    name: torcd
 
 deploy:
   description: 'torcd major release'
