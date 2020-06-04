@@ -18,7 +18,7 @@ tar -xzf $LIB_CONFIG.tar.gz
 
 cd $LIB_CONFIG
 
-./configure --prefix=../.
+./configure --prefix=$(pwd)
 
 make
 
