@@ -25,7 +25,6 @@
 #include "../include/spdlog.h"
 #include "../include/server.hpp"
 
-extern char **environ;
 
 const std::int32_t BUF_SIZE = 1024;
 const std::int32_t PIPE_READ_FD = 0;
@@ -48,12 +47,19 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
   auto console = spdlog::stdout_color_mt("console");
 
   torc::svc::atomic_umap_t proc_th_cnt;
-  for (auto &it : cfg.b_procs) {
-    proc_th_cnt[it.first] = torc::svc::atomic_ptr_t(new std::atomic_uint32_t(it.second.p_t_cnt));
+  for (const auto &it : cfg.b_procs) {
+    proc_th_cnt[it.first] = std::make_shared<std::atomic_uint32_t>(it.second.p_t_cnt);
   }
 
-  int socket_desc, new_socket, c;
-  struct sockaddr_in server, client;
+  int socket_desc = 0;
+  int new_socket = 0;
+  int c = 0;
+  struct sockaddr_in server
+  {
+  };
+  struct sockaddr_in client
+  {
+  };
 
   //Create socket
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);
