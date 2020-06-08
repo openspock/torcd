@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "../include/config.hpp"
+#include "../include/spdlog.h"
 #include "../include/server.hpp"
 
 extern char **environ;
@@ -42,9 +43,10 @@ std::string read_from_sd(const std::int32_t);
 // write string to a socket descriptor
 void write_to_sd(const char *, std::int32_t);
 
-
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
 {
+  auto console = spdlog::stdout_color_mt("console");
+
   torc::svc::atomic_umap_t proc_th_cnt;
   for (auto &it : cfg.b_procs) {
     proc_th_cnt[it.first] = torc::svc::atomic_ptr_t(new std::atomic_uint32_t(it.second.p_t_cnt));
@@ -80,6 +82,11 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base cfg)
       std::cerr << "Client accept failed" << std::endl;
       return exitcode::boot_failure;
     }
+
+    char *client_ip = inet_ntoa(client.sin_addr);
+    int client_port = ntohs(client.sin_port);
+
+    console->info("host: {}, port: {}", client_ip, client_port);
 
     std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
