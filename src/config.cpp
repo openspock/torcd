@@ -44,16 +44,18 @@ std::optional<torc::cfg::Base> torc::cfg::create()
       const libconfig::Setting &proc = processes[i];
 
       std::string name;
-      std::uint32_t cnt;
+      std::uint32_t cnt = 0;
       std::string cmd;
+      std::uint32_t argc = 0;
 
       if (!(
             proc.lookupValue("name", name) && proc.lookupValue("threads", cnt) && proc.lookupValue("cmd", cmd))) {
         // return no-config even if a single proc isn't configured properly
         return {};
       }
+      proc.lookupValue("argc", argc);
 
-      procs.insert({ name, torc::cfg::Proc{ name, cnt, cmd } });
+      procs.insert({ name, torc::cfg::Proc{ name, cnt, cmd, argc } });
     }
 
     return torc::cfg::Base{ port, procs };

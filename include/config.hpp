@@ -13,6 +13,7 @@ struct Proc
   std::string p_name;// name entry
   std::uint32_t p_t_cnt;// count of parallel executions
   std::string p_cmd;// command to be executed
+  std::uint32_t p_argc;// no of cmd line args
 };
 
 struct Base

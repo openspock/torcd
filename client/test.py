@@ -29,10 +29,6 @@ def main(argv):
         f = s.makefile('w', None)
         f.write(cmd)
         f.flush()        
-        cmd = 'invoke'
-        f = s.makefile('w', None)
-        f.write(cmd)
-        f.flush()                
         data = s.recv(1024)
         s.close()
 

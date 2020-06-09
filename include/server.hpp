@@ -20,7 +20,7 @@ enum class exitcode : std::int16_t {
 };
 
 // starts the server with the passed config
-exitcode start(const torc::cfg::Base cfg);
+exitcode start(const torc::cfg::Base &);
 
 // Handles connection for ever new client socket in a new
 // thread.
