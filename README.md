@@ -15,6 +15,7 @@ All right. It's just some name (that sounded cool to me) and seemed like a good 
 * simple and easy to configure using a single [libcconfig](https://hyperrealm.github.io/libconfig/) empowered configuration file. 
 * lightweight
 * memory efficient
+* performance overhead - ~20-30 millis. Executing a command directly in the shell vs torcd.
 
 # Sample server configuration
 Here's a sample `torc.cfg` file - 

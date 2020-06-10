@@ -5,7 +5,11 @@ CC = clang++
 # compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -g -Wall -std=c++17
+ifeq ($(DEBUG), true)
+	CFLAGS  = -g -Wall -std=c++17
+else
+	CFLAGS = -std=c++17
+endif
   
   
 # the name to use for both the target source file, and the output file:
@@ -24,11 +28,10 @@ $(MAIN):
 	$(CC) $(CFLAGS) -c -o $(MAIN) src/main.cpp 
 
 $(CONFIG):
-	$(CC) $(CFLAGS) -c src/config.cpp -Iinclude/config.hpp -o $(CONFIG)
+	$(CC) $(CFLAGS) -c src/config.cpp -Iinclude -o $(CONFIG)
 
 $(SERVER):
-	$(CC) $(CFLAGS) -c src/server.cpp -Iinclude/server.hpp -o $(SERVER)
+	$(CC) $(CFLAGS) -c src/server.cpp -Iinclude -o $(SERVER)
 
 clean:
 	rm target/*.o target/torcd
-	#rm include/*.gch
