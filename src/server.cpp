@@ -92,7 +92,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
     char *client_ip = inet_ntoa(client.sin_addr);
     int client_port = ntohs(client.sin_port);
 
-    console->info("host: {}, port: {}", client_ip, client_port);
+    //console->info("host: {}, port: {}", client_ip, client_port);
 
     std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
