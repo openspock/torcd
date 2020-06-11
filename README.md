@@ -1,7 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/e0ds2msby5qwwaqm?svg=true)](https://ci.appveyor.com/project/ameya-bhurke/torcd)
 
 # What is torcd?
-`torcd` is a simple non-secure internet based throttling transport orchestrator program. 
+`torcd` is a simple socket based orchestrator program that executes commands(program binaries existing on server disk) on the server based on client input. The server process executes as a daemon on the server.
 
 It is pronounced as `torque d`. 
 
@@ -14,7 +14,7 @@ All right. It's just some name (that sounded cool to me) and seemed like a good 
 * simple and easy to configure using a single [libcconfig](https://hyperrealm.github.io/libconfig/) empowered configuration file. 
 * lightweight
 * memory efficient
-* performance overhead - ~20-30 millis. Executing a command directly in the shell vs torcd.
+* performance overhead is minimal, ~20-30 millis while executing a command directly in the shell vs torcd.
 
 # Sample server configuration
 Here's a sample `torc.cfg` file - 
@@ -51,7 +51,7 @@ $ 99.99.99.99 # response from the server
 ```
 
 The client connects to the server on a well known `host:port` and then sends the following on a newline - 
-* proc/ cmd name
+* proc/ cmd name as configured in the name param of a process in config.
 * 1 or more arguments separated by command line. **The exact count of arguments should be configured in the configuration file.**
 
 The server won't execute the command until it receives the exact number of arguments.
