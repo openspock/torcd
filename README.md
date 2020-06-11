@@ -1,6 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/e0ds2msby5qwwaqm?svg=true)](https://ci.appveyor.com/project/ameya-bhurke/torcd)
 
-## Status: DRAFT
 # What is torcd?
 `torcd` is a simple non-secure internet based throttling transport orchestrator program. 
 
@@ -56,6 +55,10 @@ The client connects to the server on a well known `host:port` and then sends the
 * 1 or more arguments separated by command line. **The exact count of arguments should be configured in the configuration file.**
 
 The server won't execute the command until it receives the exact number of arguments.
+
+## Input output
+
+When the server executes a command it reroutes the `stdin` and `stdout`/`stderr` to the client socket. The client program can then effectively use the socket to interact with the command.
 
 # Test client
 There's a test client available in python [here](./client/test.py)
