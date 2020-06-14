@@ -6,12 +6,18 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <syslog.h>
 
 #include "../include/libconfig.hpp"
 #include "../include/config.hpp"
 #include "../include/server.hpp"
 
 constexpr int file_perm = 027;
+
+void init_log()
+{
+  openlog(NULL, LOG_NOWAIT | LOG_PID, LOG_DAEMON | LOG_USER);
+}
 
 void daemonize()
 {
@@ -57,6 +63,8 @@ int main(int /*argc*/, char ** /*argv*/)
 {
   try {
     auto config = torc::cfg::create().value();
+
+    init_log();
 
     daemonize();
 

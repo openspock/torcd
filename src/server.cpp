@@ -15,14 +15,15 @@
 #include <sys/signal.h>
 #include <netdb.h>//hostent
 #include <arpa/inet.h>
+#include <sys/syslog.h>
 #include <unistd.h>
 #include <thread>
 #include <unordered_map>
 #include <atomic>
 #include <vector>
+#include <syslog.h>
 
 #include "../include/config.hpp"
-#include "../include/spdlog.h"
 #include "../include/server.hpp"
 
 
@@ -44,8 +45,6 @@ void write_to_sd(const char *, std::int32_t);
 
 torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
 {
-  auto console = spdlog::stdout_color_mt("console");
-
   torc::svc::atomic_umap_t proc_th_cnt;
   for (const auto &it : cfg.b_procs) {
     proc_th_cnt[it.first] = std::make_shared<std::atomic_uint32_t>(it.second.p_t_cnt);
@@ -64,7 +63,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
   //Create socket
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_desc == -1) {
-    console->info("Could not create a socket");
+    syslog(LOG_ERR, "Could not create a socket");
     return exitcode::boot_failure;
   }
 
@@ -75,7 +74,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
 
   //Bind
   if (bind(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0) {
-    console->info("Could not create a socket");
+    syslog(LOG_ERR, "Could not bind a socket on %d", cfg.b_port);
     return exitcode::boot_failure;
   }
 
@@ -85,14 +84,14 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
   c = sizeof(struct sockaddr_in);
   while ((new_socket = accept4(socket_desc, (struct sockaddr *)&client, (socklen_t *)&c, SOCK_CLOEXEC)) != 0) {
     if (new_socket < 0) {
-      std::cerr << "Client accept failed" << std::endl;
+      syslog(LOG_ERR, "Could not accept an incoming client connection");
       return exitcode::boot_failure;
     }
 
     char *client_ip = inet_ntoa(client.sin_addr);
     int client_port = ntohs(client.sin_port);
 
-    //console->info("host: {}, port: {}", client_ip, client_port);
+    syslog(LOG_INFO, "new connection from host: %s, port: %d", client_ip, client_port);
 
     std::thread t(connection_handler, new_socket, std::ref(cfg), std::ref(proc_th_cnt));
 
