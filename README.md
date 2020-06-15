@@ -1,11 +1,12 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/e0ds2msby5qwwaqm?svg=true)](https://ci.appveyor.com/project/ameya-bhurke/torcd)
 
 # What is torcd?
-`torcd` is a simple socket based orchestrator program that executes commands(program binaries existing on server disk) on the server based on client input. The server process executes as a daemon on the server.
+`torcd` is a simple posix compliant internet super server program that executes commands(program binaries existing on server disk) on the server based on client input. The server process executes as a daemon on the server. For every incoming request, the server spawns a new thread which forks a process as per process configuration. `torcd` is lightweight and doesn't consume a lot of resources itself and can be used in resource constrained environments.
 
 It is pronounced as `torque d`. 
 
-All right. It's just some name (that sounded cool to me) and seemed like a good short form of transport orchestration, something (though not very accurate) this program does.
+# Why torcd?
+It's just some name (that sounded cool to me) and seemed like a good short form of transport orchestration, something (though not very accurate) this program does.
 
 # What does torcd do?
 `torcd` enables a client to execute commands on the server over a `TCP INET` stream socket. There are a lot of programs that do that, then, why another one? 
