@@ -32,6 +32,8 @@ const std::int32_t BUF_SIZE = 1024;
 const std::int32_t PIPE_READ_FD = 0;
 const std::int32_t PIPE_WRIT_FD = 1;
 
+extern char **environ;
+
 // Executes the process and
 // reads/ writes from the passed socket descriptor
 // to the process std file descriptor.
@@ -39,7 +41,7 @@ std::int64_t exec(const torc::cfg::Proc &, std::vector<std::string>, std::int32_
 
 // read buffer char data from the socket descriptor
 // and return a string.
-std::string &read_from_sd(const std::int32_t);
+std::string read_from_sd(const std::int32_t);
 
 // write string to a socket descriptor
 void write_to_sd(const char *, std::int32_t);
@@ -102,7 +104,7 @@ torc::svc::exitcode torc::svc::start(const torc::cfg::Base &cfg)
   return torc::svc::exitcode::graceful_shutdown;
 }
 
-std::string &read_from_sd(const std::int32_t sd)
+std::string read_from_sd(const std::int32_t sd)
 {
   std::int32_t bytes_read = 0;
   std::array<char, BUF_SIZE> buff{};
