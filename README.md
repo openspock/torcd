@@ -47,12 +47,14 @@ Let's assume that the server is running on `localhost` port `3699`.
 ```sh
 $ nc localhost 3699
 $ hosttoip # new line
-$ www.somevalidhost.com # new line, argument
+$ torcd> #prompt from the server confirming it's ready to receive an argument.
+$ torcd>www.somevalidhost.com # new line, client sends argument
 $ 99.99.99.99 # response from the server
 ```
 
 The client connects to the server on a well known `host:port` and then sends the following on a newline - 
 * proc/ cmd name as configured in the name param of a process in config.
+* the server will then respond with a prompt confirming it's ready to receive an argument.
 * 1 or more arguments separated by command line. **The exact count of arguments should be configured in the configuration file.**
 
 The server won't execute the command until it receives the exact number of arguments.

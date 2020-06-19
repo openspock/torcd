@@ -143,6 +143,7 @@ void torc::svc::connection_handler(const std::int32_t sock_desc, const torc::cfg
       std::vector<std::string> argv;
 
       for (std::uint32_t i = 0; i < proc.p_argc; i++) {
+        write_to_sd("torcd>", sock_desc);
         argv.push_back(read_from_sd(sock_desc));
       }
 

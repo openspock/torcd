@@ -30,6 +30,11 @@ def main(argv):
         f.write(cmd)
         f.flush()        
         data = s.recv(1024)
+        if data.decode('utf-8') == 'torcd>':
+            f = s.makefile('w', None)
+            f.write('google.com')
+            f.flush()
+            data = s.recv(1024)                    
         s.close()
 
     print(data.decode('utf-8'))
